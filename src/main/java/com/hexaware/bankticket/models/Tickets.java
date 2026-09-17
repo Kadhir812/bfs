@@ -36,6 +36,8 @@ public class Tickets {
 
     private TicketCategory category;
 
+    private String subject;
+
     private String description;
 
     private Status status;

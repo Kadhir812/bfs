@@ -1,4 +1,4 @@
-package com.example.bankticket;
+package com.hexaware.bankticket;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

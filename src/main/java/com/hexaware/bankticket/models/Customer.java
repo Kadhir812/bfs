@@ -27,7 +27,7 @@ public class Customer {
     
     @OneToOne
     @JoinColumn(name="FK_userId",nullable=false,unique=true)
-    private User userId;
+    private User user;
 
     private String customerPhoneNum;
 
