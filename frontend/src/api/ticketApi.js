@@ -1,26 +1,26 @@
 import apiClient from './client'
 
-export async function createTicket(ticket) {
+export const createTicket = async (ticket) => {
   const response = await apiClient.post('/tickets', ticket)
   return response.data
 }
 
-export async function updateTicket(ticketId, ticket) {
+export const updateTicket = async (ticketId, ticket) => {
   const response = await apiClient.put(`/tickets/${ticketId}`, ticket)
   return response.data
 }
 
-export async function getMyTickets() {
+export const getMyTickets = async () => {
   const response = await apiClient.get('/tickets')
   return response.data
 }
 
-export async function getAllTickets() {
+export const getAllTickets = async () => {
   const response = await apiClient.get('/support/tickets')
   return response.data
 }
 
-export async function updateTicketStatus(ticketId, status) {
+export const updateTicketStatus = async (ticketId, status) => {
   const response = await apiClient.put(`/support/tickets/${ticketId}/status`, null, {
     params: { status },
   })

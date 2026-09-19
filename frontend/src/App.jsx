@@ -1,7 +1,7 @@
 import './App.css'
 import AppRoutes from './components/AppRoutes'
 
-function App() {
+const App = () => {
   return <AppRoutes />
 }
 

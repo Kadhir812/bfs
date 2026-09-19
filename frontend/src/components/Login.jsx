@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getApiError, login } from '../api/authApi'
 
-function Login() {
+const Login = () => {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  async function handleSubmit(event) {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
     setIsLoading(true)
@@ -85,7 +85,7 @@ function Login() {
   )
 }
 
-function InputField({ label, type, value, placeholder, onChange }) {
+const InputField = ({ label, type, value, placeholder, onChange }) => {
   return (
     <label className="field">
       <span>{label}</span>

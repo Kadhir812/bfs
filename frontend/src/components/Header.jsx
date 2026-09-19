@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 
-function Header({ session }) {
+const Header = ({ session }) => {
   const navigate = useNavigate()
 
-  function signOut() {
+  const signOut = () => {
     localStorage.removeItem('bankticket-session')
     navigate('/login', { replace: true })
   }

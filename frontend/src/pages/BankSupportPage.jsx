@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import SupportTicketList from '../components/SupportTicketList'
+import SupportTicketDetails from '../components/SupportTicketDetails'
 import { addComment, getComments } from '../api/commentApi'
 import { getApiError } from '../api/authApi'
 import { getAllTickets, updateTicketStatus } from '../api/ticketApi'
 
-function BankSupportPage() {
+const BankSupportPage = () => {
   const session = JSON.parse(localStorage.getItem('bankticket-session'))
   const [tickets, setTickets] = useState([])
   const [selectedTicket, setSelectedTicket] = useState(null)
@@ -13,105 +15,103 @@ function BankSupportPage() {
   const [comment, setComment] = useState('')
   const [message, setMessage] = useState('')
 
+  const showError = (error, fallbackMessage) => {
+    setMessage(getApiError(error, fallbackMessage))
+  }
+
   useEffect(() => {
-    async function loadTickets() {
+    const loadTickets = async () => {
       try {
-        const data = await getAllTickets()
-        setTickets(data)
-        if (data.length > 0) {
-          setSelectedTicket(data[0])
-          setComments(await getComments(data[0].ticketId))
+        const ticketList = await getAllTickets()
+        setTickets(ticketList)
+
+        if (ticketList.length > 0) {
+          const firstTicket = ticketList[0]
+          setSelectedTicket(firstTicket)
+          setComments(await getComments(firstTicket.ticketId))
         }
       } catch (error) {
-        setMessage(getApiError(error, 'Could not load tickets.'))
+        showError(error, 'Could not load tickets.')
       }
     }
 
     loadTickets()
   }, [])
 
-  async function selectTicket(ticket) {
+  const selectTicket = async (ticket) => {
     setSelectedTicket(ticket)
     try {
       setComments(await getComments(ticket.ticketId))
     } catch (error) {
-      setMessage(getApiError(error, 'Could not load comments.'))
+      showError(error, 'Could not load comments.')
     }
   }
 
-  async function handleCommentSubmit(event) {
+  const handleCommentSubmit = async (event) => {
     event.preventDefault()
-    if (!comment.trim() || !selectedTicket) return
+
+    if (!comment.trim() || !selectedTicket) {
+      return
+    }
 
     try {
       const savedComment = await addComment(selectedTicket.ticketId, comment)
       setComments([...comments, savedComment])
       setComment('')
     } catch (error) {
-      setMessage(getApiError(error, 'Could not add the comment.'))
+      showError(error, 'Could not add the comment.')
     }
   }
 
-  async function handleStatusChange(event) {
+  const handleStatusChange = async (event) => {
+    if (!selectedTicket) {
+      return
+    }
+
     const status = event.target.value
 
     try {
       const updatedTicket = await updateTicketStatus(selectedTicket.ticketId, status)
       setSelectedTicket(updatedTicket)
-      setTickets(tickets.map((ticket) => ticket.ticketId === updatedTicket.ticketId ? updatedTicket : ticket))
+      const updatedTickets = tickets.map((ticket) => (
+        ticket.ticketId === updatedTicket.ticketId ? updatedTicket : ticket
+      ))
+
+      setTickets(updatedTickets)
       setMessage('Ticket status updated.')
     } catch (error) {
-      setMessage(getApiError(error, 'Could not update the ticket status.'))
+      showError(error, 'Could not update the ticket status.')
     }
   }
 
-  return <main className="dashboard">
-    <Header session={session} />
-    <section className="dashboard-content support-content">
-      <p className="eyebrow accent">SUPPORT DESK</p>
-      <h1>Ticket comments</h1>
-      <p className="dashboard-copy">Select a ticket to reply to the customer.</p>
+  return (
+    <main className="dashboard">
+      <Header session={session} />
 
-      <div className="support-tickets">
-        {tickets.length === 0 && <p className="empty-message">There are no tickets yet.</p>}
-        {tickets.map((ticket) => <button className="ticket-row" key={ticket.ticketId} onClick={() => selectTicket(ticket)}>
-          <span>
-            <strong>#{ticket.ticketId} {ticket.subject}</strong>
-            <small>{ticket.category} · Customer: {ticket.customer?.user?.username || 'Unknown'} · Created: {formatDate(ticket.createdAt)} · Updated: {formatDate(ticket.updatedAt)}</small>
-          </span>
-          <span>{ticket.status}</span>
-        </button>)}
-      </div>
+      <section className="dashboard-content support-content">
+        <p className="eyebrow accent">SUPPORT DESK</p>
+        <h1>Ticket comments</h1>
+        <p className="dashboard-copy">Select a ticket to reply to the customer.</p>
 
-      {selectedTicket && <div className="comment-section">
-        <div className="selected-ticket-heading">
-          <div>
-            <h3>#{selectedTicket.ticketId} {selectedTicket.subject}</h3>
-            <p className="ticket-details">Category: {selectedTicket.category} · Customer: {selectedTicket.customer?.user?.username || 'Unknown'}</p>
-            <p className="ticket-details">Created: {formatDate(selectedTicket.createdAt)} · Updated: {formatDate(selectedTicket.updatedAt)}</p>
-            <p className="ticket-description">{selectedTicket.description}</p>
-          </div>
-          <label className="status-field">
-            <span>Status</span>
-            <select value={selectedTicket.status} onChange={handleStatusChange}>
-              <option value="OPEN">Open</option>
-              <option value="IN_PROGRESS">In progress</option>
-              <option value="CLOSED">Closed</option>
-            </select>
-          </label>
-        </div>
-        <div className="comments">{comments.length === 0 ? <p className="empty-message">No comments yet.</p> : comments.map((item) => <div className="comment" key={item.ticketCommentId}><strong>{item.user?.username || 'User'}</strong><small>{formatDate(item.createdAt)}</small><p>{item.message}</p></div>)}</div>
-        <form className="comment-form" onSubmit={handleCommentSubmit}><input required value={comment} placeholder="Write a reply" onChange={(event) => setComment(event.target.value)} /><button className="customer-action" type="submit">Send</button></form>
-      </div>}
-      {message && <p className="ticket-message">{message}</p>}
-    </section>
-    <Footer />
-  </main>
-}
+        <SupportTicketList tickets={tickets} onSelect={selectTicket} />
 
-function formatDate(value) {
-  if (!value) return 'Not available'
-  return new Date(value).toLocaleString()
+        {selectedTicket && (
+          <SupportTicketDetails
+            ticket={selectedTicket}
+            comments={comments}
+            comment={comment}
+            onCommentChange={setComment}
+            onCommentSubmit={handleCommentSubmit}
+            onStatusChange={handleStatusChange}
+          />
+        )}
+
+        {message && <p className="ticket-message">{message}</p>}
+      </section>
+
+      <Footer />
+    </main>
+  )
 }
 
 export default BankSupportPage

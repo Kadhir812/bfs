@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import TicketForm from '../components/TicketForm'
 import { addComment, getComments } from '../api/commentApi'
 import { getApiError } from '../api/authApi'
 import { createTicket, getMyTickets, updateTicket } from '../api/ticketApi'
 
-function CustomerPage() {
+const emptyTicket = {
+  category: 'ATM',
+  subject: '',
+  description: '',
+}
+
+const CustomerPage = () => {
   const session = JSON.parse(localStorage.getItem('bankticket-session'))
   const [tickets, setTickets] = useState([])
   const [selectedTicket, setSelectedTicket] = useState(null)
@@ -13,11 +20,15 @@ function CustomerPage() {
   const [comment, setComment] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingTicket, setEditingTicket] = useState(null)
-  const [ticket, setTicket] = useState({ category: 'ATM', subject: '', description: '' })
+  const [ticket, setTicket] = useState(emptyTicket)
   const [message, setMessage] = useState('')
 
+  const showError = (error, fallbackMessage) => {
+    setMessage(getApiError(error, fallbackMessage))
+  }
+
   useEffect(() => {
-    async function loadTickets() {
+    const loadTickets = async () => {
       try {
         const data = await getMyTickets()
         setTickets(data)
@@ -26,23 +37,45 @@ function CustomerPage() {
           setComments(await getComments(data[0].ticketId))
         }
       } catch (error) {
-        setMessage(getApiError(error, 'Could not load tickets.'))
+        showError(error, 'Could not load tickets.')
       }
     }
 
     loadTickets()
   }, [])
 
-  async function selectTicket(ticketToSelect) {
+  const selectTicket = async (ticketToSelect) => {
     setSelectedTicket(ticketToSelect)
     try {
       setComments(await getComments(ticketToSelect.ticketId))
     } catch (error) {
-      setMessage(getApiError(error, 'Could not load comments.'))
+      showError(error, 'Could not load comments.')
     }
   }
 
-  async function handleTicketSubmit(event) {
+  const openNewTicketForm = () => {
+    setEditingTicket(null)
+    setTicket(emptyTicket)
+    setShowForm(true)
+  }
+
+  const openEditTicketForm = () => {
+    setEditingTicket(selectedTicket)
+    setTicket({
+      category: selectedTicket.category,
+      subject: selectedTicket.subject,
+      description: selectedTicket.description,
+    })
+    setShowForm(true)
+  }
+
+  const closeTicketForm = () => {
+    setShowForm(false)
+    setEditingTicket(null)
+    setTicket(emptyTicket)
+  }
+
+  const handleTicketSubmit = async (event) => {
     event.preventDefault()
     try {
       const savedTicket = editingTicket
@@ -54,17 +87,15 @@ function CustomerPage() {
         : [...tickets, savedTicket]
 
       setTickets(updatedTickets)
-      setTicket({ category: 'ATM', subject: '', description: '' })
-      setShowForm(false)
-      setEditingTicket(null)
+      closeTicketForm()
       await selectTicket(savedTicket)
       setMessage(editingTicket ? 'Ticket updated successfully.' : 'Ticket created successfully.')
     } catch (error) {
-      setMessage(getApiError(error, 'Could not create the ticket.'))
+      showError(error, 'Could not save the ticket.')
     }
   }
 
-  async function handleCommentSubmit(event) {
+  const handleCommentSubmit = async (event) => {
     event.preventDefault()
     if (!comment.trim() || !selectedTicket) return
 
@@ -73,7 +104,7 @@ function CustomerPage() {
       setComments([...comments, savedComment])
       setComment('')
     } catch (error) {
-      setMessage(getApiError(error, 'Could not add the comment.'))
+      showError(error, 'Could not add the comment.')
     }
   }
 
@@ -88,17 +119,28 @@ function CustomerPage() {
         <div className="ticket-section">
           <div className="section-heading">
             <h2>My tickets</h2>
-            <button className="customer-action" onClick={() => {
-              setEditingTicket(null)
-              setTicket({ category: 'ATM', subject: '', description: '' })
-              setShowForm(!showForm)
-            }}>{showForm ? 'Cancel' : 'New ticket'}</button>
+            <button className="customer-action" onClick={showForm ? closeTicketForm : openNewTicketForm}>
+              {showForm ? 'Cancel' : 'New ticket'}
+            </button>
           </div>
 
-          {showForm && <TicketForm ticket={ticket} onChange={setTicket} onSubmit={handleTicketSubmit} isEditing={Boolean(editingTicket)} onCancel={() => { setShowForm(false); setEditingTicket(null) }} />}
+          {showForm && <TicketForm
+            ticket={ticket}
+            onChange={setTicket}
+            onSubmit={handleTicketSubmit}
+            isEditing={Boolean(editingTicket)}
+            onCancel={closeTicketForm}
+          />}
 
-          {tickets.length === 0 && <p className="empty-message">You do not have any tickets yet.</p>}
-          {tickets.map((item) => <button className="ticket-row" key={item.ticketId} onClick={() => selectTicket(item)}>
+          {tickets.length === 0 && (
+            <p className="empty-message">You do not have any tickets yet.</p>
+          )}
+
+          {tickets.map((item) => <button
+            className="ticket-row"
+            key={item.ticketId}
+            onClick={() => selectTicket(item)}
+          >
             <span>
               <strong>#{item.ticketId} {item.subject}</strong>
               <small>Created: {formatDate(item.createdAt)} · Updated: {formatDate(item.updatedAt)}</small>
@@ -106,7 +148,14 @@ function CustomerPage() {
             <span>{item.status}</span>
           </button>)}
 
-          {selectedTicket && <CommentThread ticket={selectedTicket} comments={comments} comment={comment} setComment={setComment} onSubmit={handleCommentSubmit} onEdit={() => { setTicket({ category: selectedTicket.category, subject: selectedTicket.subject, description: selectedTicket.description }); setEditingTicket(selectedTicket); setShowForm(true) }} />}
+          {selectedTicket && <CommentThread
+            ticket={selectedTicket}
+            comments={comments}
+            comment={comment}
+            setComment={setComment}
+            onSubmit={handleCommentSubmit}
+            onEdit={openEditTicketForm}
+          />}
           {message && <p className="ticket-message">{message}</p>}
         </div>
       </section>
@@ -115,28 +164,37 @@ function CustomerPage() {
   )
 }
 
-function TicketForm({ ticket, onChange, onSubmit, isEditing, onCancel }) {
-  return <form className="ticket-form" onSubmit={onSubmit}>
-    <label className="field"><span>Category</span><select value={ticket.category} onChange={(event) => onChange({ ...ticket, category: event.target.value })}><option>ATM</option><option>CARD</option><option>TRANSACTION</option><option>ACCOUNT</option><option>LOAN</option></select></label>
-    <label className="field"><span>Subject</span><input required value={ticket.subject} onChange={(event) => onChange({ ...ticket, subject: event.target.value })} /></label>
-    <label className="field"><span>Description</span><textarea required rows="4" value={ticket.description} onChange={(event) => onChange({ ...ticket, description: event.target.value })} /></label>
-    <button className="primary-button" type="submit">{isEditing ? 'Save changes' : 'Submit ticket'}</button>
-    {isEditing && <button className="customer-action" type="button" onClick={onCancel}>Cancel</button>}
-  </form>
-}
+const CommentThread = ({ ticket, comments, comment, setComment, onSubmit, onEdit }) => {
+  return (
+    <div className="comment-section">
+      <div className="selected-ticket-heading">
+        <div>
+          <h3>#{ticket.ticketId} {ticket.subject}</h3>
+          <p className="ticket-details">Created: {formatDate(ticket.createdAt)} · Updated: {formatDate(ticket.updatedAt)}</p>
+        </div>
+        <button className="customer-action" type="button" onClick={onEdit}>Edit</button>
+      </div>
 
-function CommentThread({ ticket, comments, comment, setComment, onSubmit, onEdit }) {
-  return <div className="comment-section">
-    <div className="selected-ticket-heading">
-      <div><h3>#{ticket.ticketId} {ticket.subject}</h3><p className="ticket-details">Created: {formatDate(ticket.createdAt)} · Updated: {formatDate(ticket.updatedAt)}</p></div>
-      <button className="customer-action" type="button" onClick={onEdit}>Edit</button>
+      <div className="comments">
+        {comments.length === 0 ? (
+          <p className="empty-message">No comments yet.</p>
+        ) : comments.map((item) => (
+          <div className="comment" key={item.ticketCommentId}>
+            <strong>{item.user?.username || 'User'}</strong>
+            <p>{item.message}</p>
+          </div>
+        ))}
+      </div>
+
+      <form className="comment-form" onSubmit={onSubmit}>
+        <input required value={comment} placeholder="Write a comment" onChange={(event) => setComment(event.target.value)} />
+        <button className="customer-action" type="submit">Send</button>
+      </form>
     </div>
-    <div className="comments">{comments.length === 0 ? <p className="empty-message">No comments yet.</p> : comments.map((item) => <div className="comment" key={item.ticketCommentId}><strong>{item.user?.username}</strong><p>{item.message}</p></div>)}</div>
-    <form className="comment-form" onSubmit={onSubmit}><input required value={comment} placeholder="Write a comment" onChange={(event) => setComment(event.target.value)} /><button className="customer-action" type="submit">Send</button></form>
-  </div>
+  )
 }
 
-function formatDate(value) {
+const formatDate = (value) => {
   if (!value) return 'Not available'
   return new Date(value).toLocaleString()
 }

@@ -1,4 +1,4 @@
-function Footer() {
+const Footer = () => {
   return (
     <footer className="site-footer">
       <span>Bank Ticket System</span>

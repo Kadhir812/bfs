@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getApiError, register } from '../api/authApi'
 
-function Register() {
+const Register = () => {
   const navigate = useNavigate()
   const [form, setForm] = useState({
     username: '',
@@ -14,11 +14,11 @@ function Register() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  function updateField(field, value) {
+  const updateField = (field, value) => {
     setForm({ ...form, [field]: value })
   }
 
-  async function handleSubmit(event) {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
     setIsLoading(true)
@@ -83,7 +83,7 @@ function Register() {
   )
 }
 
-function InputField({ label, type, value, placeholder, onChange }) {
+const InputField = ({ label, type, value, placeholder, onChange }) => {
   return (
     <label className="field">
       <span>{label}</span>

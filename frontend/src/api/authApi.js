@@ -1,6 +1,6 @@
 import apiClient from './client'
 
-export async function login(username, password) {
+export const login = async (username, password) => {
   const response = await apiClient.post('/api/auth/login', {
     username,
     password,
@@ -9,12 +9,12 @@ export async function login(username, password) {
   return response.data
 }
 
-export async function register(user) {
+export const register = async (user) => {
   await apiClient.post('/api/auth/register', user)
   return login(user.username, user.password)
 }
 
-export function getApiError(error, fallbackMessage) {
+export const getApiError = (error, fallbackMessage) => {
   const responseData = error.response?.data
 
   if (typeof responseData === 'string' && responseData) {

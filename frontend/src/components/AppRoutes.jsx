@@ -4,12 +4,12 @@ import Register from './Register'
 import CustomerPage from '../pages/CustomerPage'
 import BankSupportPage from '../pages/BankSupportPage'
 
-function getSession() {
+const getSession = () => {
   const saved = localStorage.getItem('bankticket-session')
   return saved ? JSON.parse(saved) : null
 }
 
-function ProtectedRoute({ role, children }) {
+const ProtectedRoute = ({ role, children }) => {
   const session = getSession()
   if (!session) return <Navigate to="/login" replace />
   if (role && session.role !== role) {
@@ -18,7 +18,7 @@ function ProtectedRoute({ role, children }) {
   return children
 }
 
-function AppRoutes() {
+const AppRoutes = () => {
   return <BrowserRouter>
     <Routes>
       <Route path="/login" element={<Login />} />
