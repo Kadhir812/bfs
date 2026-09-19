@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service 
 @RequiredArgsConstructor 
-public class TicketSupport {
+public class TicketSupportService {
 
     private final TicketRepository ticketRepository;
 

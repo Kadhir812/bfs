@@ -48,6 +48,7 @@ public class AuthService {
             .name(request.getName())
             .user(saved)
             .email(request.getEmail())
+            .customerPhoneNum(request.getCustomerPhoneNum())
             .build();
 
         customerRepository.save(customer);

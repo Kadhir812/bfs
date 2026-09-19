@@ -20,8 +20,14 @@ public class GlobalExceptionHandler {
                             .body(exception.getMessage());
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
+    @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<String> handleUserNotFound(UserNotFoundException exception){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body(exception.getMessage());
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<String> handleUsernameNotFound(UsernameNotFoundException exception){
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                             .body(exception.getMessage());
     }

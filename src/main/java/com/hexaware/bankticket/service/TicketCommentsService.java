@@ -27,11 +27,11 @@ public class TicketCommentsService {
     private final TicketCommentsRepository ticketCommentsRepository;
 
 
-    public TicketCommentResponse addComments(Long ticketId, Long userId, TicketCommentRequest request){
+    public TicketCommentResponse addComments(Long ticketId, String username, TicketCommentRequest request){
         Tickets ticket = ticketRepository.findById(ticketId)
                                         .orElseThrow(() -> new TicketNotFoundException("Ticket not Found: " + ticketId));
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUsername(username)
                                    .orElseThrow(() ->  new UserNotFoundException("User Not found"));
 
         TicketComments ticketComment = TicketComments.builder()
