@@ -3,6 +3,7 @@ package com.hexaware.bankticket.models;
 
 import com.hexaware.bankticket.models.enums.Role;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,9 +29,14 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long userId;
+
+    @Column (unique = true,nullable = false)
     private String username;
+
+    @Column(nullable= false)
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable= false)
     private Role role;  
 }
