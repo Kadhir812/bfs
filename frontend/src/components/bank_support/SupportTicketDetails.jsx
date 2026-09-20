@@ -15,7 +15,7 @@ const SupportTicketDetails = ({
         <div>
           <h3>#{ticket.ticketId} {ticket.subject}</h3>
           <p className="ticket-details">
-            Category: {ticket.category} · Customer: {ticket.customer?.user?.username || 'Unknown'}
+            Category: {ticket.category} · Priority: {ticket.priority || 'Unknown'} · Customer: {ticket.customer?.user?.username || 'Unknown'}
           </p>
           <p className="ticket-details">
             Created: {formatDate(ticket.createdAt)} · Updated: {formatDate(ticket.updatedAt)}

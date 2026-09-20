@@ -16,7 +16,7 @@ const SupportTicketList = ({ tickets, onSelect }) => {
           <span>
             <strong>#{ticket.ticketId} {ticket.subject}</strong>
             <small>
-              {ticket.category} · Customer: {ticket.customer?.user?.username || 'Unknown'}
+              {ticket.category} · <strong>Priority: {ticket.priority || 'Unknown'}</strong> · Customer: {ticket.customer?.user?.username || 'Unknown'}
               {' · '}Created: {formatDate(ticket.createdAt)}
               {' · '}Updated: {formatDate(ticket.updatedAt)}
             </small>
