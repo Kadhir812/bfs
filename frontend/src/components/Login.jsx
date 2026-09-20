@@ -16,8 +16,9 @@ const Login = () => {
 
     try {
       const data = await login(username, password)
-
       localStorage.setItem('bankticket-session', JSON.stringify(data))
+
+      
       navigate(data.role === 'BANK_SUPPORT' ? '/support' : '/customer')
     } catch (requestError) {
       setError(getApiError(requestError, 'Login failed. Check your details.'))
@@ -52,7 +53,7 @@ const Login = () => {
               label="Username"
               type="text"
               value={username}
-              placeholder="you@example.com"
+              placeholder="enter username"
               onChange={setUsername}
             />
             <InputField

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import TicketForm from '../components/TicketForm'
+import TicketForm from '../components/customer_components/TicketForm'
+import CustomerTicketList from '../components/customer_components/CustomerTicketList'
+import CommentThread from '../components/customer_components/CommentThread'
 import { addComment, getComments } from '../api/commentApi'
 import { getApiError } from '../api/authApi'
 import { createTicket, getMyTickets, updateTicket } from '../api/ticketApi'
@@ -83,7 +85,8 @@ const CustomerPage = () => {
         : await createTicket(ticket)
 
       const updatedTickets = editingTicket
-        ? tickets.map((item) => item.ticketId === savedTicket.ticketId ? savedTicket : item)
+        ? tickets.map((item) => 
+                            item.ticketId === savedTicket.ticketId ? savedTicket : item)
         : [...tickets, savedTicket]
 
       setTickets(updatedTickets)
@@ -132,71 +135,27 @@ const CustomerPage = () => {
             onCancel={closeTicketForm}
           />}
 
-          {tickets.length === 0 && (
-            <p className="empty-message">You do not have any tickets yet.</p>
+          <CustomerTicketList
+            tickets={tickets}
+            onSelect={selectTicket}
+          />
+
+          {selectedTicket && (
+            <CommentThread
+              ticket={selectedTicket}
+              comments={comments}
+              comment={comment}
+              onCommentChange={setComment}
+              onSubmit={handleCommentSubmit}
+              onEdit={openEditTicketForm}
+            />
           )}
-
-          {tickets.map((item) => <button
-            className="ticket-row"
-            key={item.ticketId}
-            onClick={() => selectTicket(item)}
-          >
-            <span>
-              <strong>#{item.ticketId} {item.subject}</strong>
-              <small>Created: {formatDate(item.createdAt)} · Updated: {formatDate(item.updatedAt)}</small>
-            </span>
-            <span>{item.status}</span>
-          </button>)}
-
-          {selectedTicket && <CommentThread
-            ticket={selectedTicket}
-            comments={comments}
-            comment={comment}
-            setComment={setComment}
-            onSubmit={handleCommentSubmit}
-            onEdit={openEditTicketForm}
-          />}
           {message && <p className="ticket-message">{message}</p>}
         </div>
       </section>
       <Footer />
     </main>
   )
-}
-
-const CommentThread = ({ ticket, comments, comment, setComment, onSubmit, onEdit }) => {
-  return (
-    <div className="comment-section">
-      <div className="selected-ticket-heading">
-        <div>
-          <h3>#{ticket.ticketId} {ticket.subject}</h3>
-          <p className="ticket-details">Created: {formatDate(ticket.createdAt)} · Updated: {formatDate(ticket.updatedAt)}</p>
-        </div>
-        <button className="customer-action" type="button" onClick={onEdit}>Edit</button>
-      </div>
-
-      <div className="comments">
-        {comments.length === 0 ? (
-          <p className="empty-message">No comments yet.</p>
-        ) : comments.map((item) => (
-          <div className="comment" key={item.ticketCommentId}>
-            <strong>{item.user?.username || 'User'}</strong>
-            <p>{item.message}</p>
-          </div>
-        ))}
-      </div>
-
-      <form className="comment-form" onSubmit={onSubmit}>
-        <input required value={comment} placeholder="Write a comment" onChange={(event) => setComment(event.target.value)} />
-        <button className="customer-action" type="submit">Send</button>
-      </form>
-    </div>
-  )
-}
-
-const formatDate = (value) => {
-  if (!value) return 'Not available'
-  return new Date(value).toLocaleString()
 }
 
 export default CustomerPage

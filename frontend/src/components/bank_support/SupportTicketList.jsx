@@ -1,3 +1,5 @@
+import formatDate from '../../utils/formatDate'
+
 const SupportTicketList = ({ tickets, onSelect }) => {
   return (
     <div className="support-tickets">
@@ -24,11 +26,6 @@ const SupportTicketList = ({ tickets, onSelect }) => {
       ))}
     </div>
   )
-}
-
-const formatDate = (value) => {
-  if (!value) return 'Not available'
-  return new Date(value).toLocaleString()
 }
 
 export default SupportTicketList

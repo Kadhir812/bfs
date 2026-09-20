@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import SupportTicketList from '../components/SupportTicketList'
-import SupportTicketDetails from '../components/SupportTicketDetails'
+import SupportTicketList from '../components/bank_support/SupportTicketList'
+import SupportTicketDetails from '../components/bank_support/SupportTicketDetails'
 import { addComment, getComments } from '../api/commentApi'
 import { getApiError } from '../api/authApi'
 import { getAllTickets, updateTicketStatus } from '../api/ticketApi'
@@ -11,8 +11,10 @@ const BankSupportPage = () => {
   const session = JSON.parse(localStorage.getItem('bankticket-session'))
   const [tickets, setTickets] = useState([])
   const [selectedTicket, setSelectedTicket] = useState(null)
+  
   const [comments, setComments] = useState([])
   const [comment, setComment] = useState('')
+
   const [message, setMessage] = useState('')
 
   const showError = (error, fallbackMessage) => {

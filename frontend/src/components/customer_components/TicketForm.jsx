@@ -1,7 +1,6 @@
 const TicketForm = ({ ticket, isEditing, onChange, onSubmit, onCancel }) => {
   
-  
-  const updateField = (field, value) => {
+    const updateField = (field, value) => {
     onChange({ ...ticket, [field]: value })
   }
 

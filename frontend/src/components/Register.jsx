@@ -26,6 +26,7 @@ const Register = () => {
     try {
       const auth = await register(form)
       localStorage.setItem('bankticket-session', JSON.stringify(auth))
+
       navigate(auth.role === 'BANK_SUPPORT' ? '/support' : '/customer')
     } catch (requestError) {
       setError(getApiError(requestError, 'Registration failed.'))
@@ -54,12 +55,35 @@ const Register = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="field-grid">
-              <InputField label="Full name" type="text" value={form.name} placeholder="Your name" onChange={(value) => updateField('name', value)} />
-              <InputField label="Phone number" type="tel" value={form.customerPhoneNum} placeholder="+91 00000 00000" onChange={(value) => updateField('customerPhoneNum', value)} />
+              <InputField label="Full name" 
+                          type="text" 
+                          value={form.name} 
+                          placeholder="Your name" 
+                          onChange={(value) => updateField('name', value)} />
+              
+              <InputField label="Phone number" 
+                          type="tel" 
+                          value={form.customerPhoneNum} 
+                          placeholder="+91 00000 00000" 
+                          onChange={(value) => updateField('customerPhoneNum', value)} />
             </div>
-            <InputField label="Email" type="email" value={form.email} placeholder="you@example.com" onChange={(value) => updateField('email', value)} />
-            <InputField label="Username" type="text" value={form.username} placeholder="Choose a username" onChange={(value) => updateField('username', value)} />
-            <InputField label="Password" type="password" value={form.password} placeholder="At least 8 characters" onChange={(value) => updateField('password', value)} />
+            <InputField label="Email" 
+                        type="email" 
+                        value={form.email} 
+                        placeholder="you@example.com" 
+                        onChange={(value) => updateField('email', value)} />
+            
+            <InputField label="Username" 
+                        type="text"   
+                        value={form.username} 
+                        placeholder="Choose a username" 
+                        onChange={(value) => updateField('username', value)} />
+            
+            <InputField label="Password" 
+                        type="password" 
+                        value={form.password} 
+                        placeholder="At least 8 characters" 
+                        onChange={(value) => updateField('password', value)} />
 
             {error && <p className="status error">{error}</p>}
 

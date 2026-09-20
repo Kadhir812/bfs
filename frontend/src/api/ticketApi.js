@@ -15,6 +15,9 @@ export const getMyTickets = async () => {
   return response.data
 }
 
+
+
+
 export const getAllTickets = async () => {
   const response = await apiClient.get('/support/tickets')
   return response.data

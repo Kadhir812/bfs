@@ -1,3 +1,5 @@
+import formatDate from '../../utils/formatDate'
+
 const CommentList = ({ comments }) => {
   return (
     <div className="comments">
@@ -14,11 +16,6 @@ const CommentList = ({ comments }) => {
       )}
     </div>
   )
-}
-
-const formatDate = (value) => {
-  if (!value) return 'Not available'
-  return new Date(value).toLocaleString()
 }
 
 export default CommentList

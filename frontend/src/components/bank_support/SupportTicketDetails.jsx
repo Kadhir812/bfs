@@ -1,4 +1,5 @@
 import CommentList from './CommentList'
+import formatDate from '../../utils/formatDate'
 
 const SupportTicketDetails = ({
   ticket,
@@ -45,11 +46,6 @@ const SupportTicketDetails = ({
       </form>
     </div>
   )
-}
-
-const formatDate = (value) => {
-  if (!value) return 'Not available'
-  return new Date(value).toLocaleString()
 }
 
 export default SupportTicketDetails
